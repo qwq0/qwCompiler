@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "target": "ES2022",
+        "lib": [
+            "ES2022"
+        ]
+    }
+}
