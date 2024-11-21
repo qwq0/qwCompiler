@@ -1,4 +1,6 @@
-import { TokenizeResult } from "./TokenizeResult";
+import { CompilerError } from "../error/CompilerError.js";
+import { Token } from "./Token.js";
+import { TokenizeResult } from "./TokenizeResult.js";
 
 /**
  * 关键字集合
@@ -52,6 +54,10 @@ let keywordsSet = new Set([
 let puncSet = new Set([
     "(",
     ")",
+    "[",
+    "]",
+    "{",
+    "}",
     ",",
     ";"
 ]);
@@ -65,6 +71,10 @@ let uppercaseLetterSet = new Set(
 let numberSet = new Set(
     (new Array(10)).fill(0).map((_o, i) => String.fromCharCode("0".charCodeAt(0) + i))
 );
+let identifierCharSet = new Set([
+    "_",
+    "$"
+]);
 
 
 
@@ -89,12 +99,82 @@ export class Tokenizer
         {
             let nowChar = srcCode[nowIndex];
             if (lowercaseLetterSet.has(nowChar) || uppercaseLetterSet.has(nowChar))
-            { }
-            else if (numberSet.has(nowChar))
-            {
+            { // 标识符和关键字
+                nowTokenStart = nowIndex;
+                do                
+                {
+                    nowChar = srcCode[++nowIndex];
+                }
+                while (
+                    lowercaseLetterSet.has(nowChar) ||
+                    uppercaseLetterSet.has(nowChar) ||
+                    numberSet.has(nowChar) ||
+                    identifierCharSet.has(nowChar)
+                );
+                let part = srcCode.slice(nowTokenStart, nowIndex);
+
+                let token = new Token();
+                token.type = (keywordsSet.has(part) ? "keyword" : "identifier");
+                token.startIndex = nowTokenStart;
+                token.endIndex = nowIndex;
+                token.value = part;
+                token.orgValue = part;
+                ret.list.push(token);
             }
-            else if (nowChar == " " || nowChar == "\t")
-            { }
+            else if (numberSet.has(nowChar))
+            { // 数字
+                nowTokenStart = nowIndex;
+                do
+                {
+                    nowChar = srcCode[++nowIndex];
+                }
+                while (
+                    lowercaseLetterSet.has(nowChar) ||
+                    uppercaseLetterSet.has(nowChar) ||
+                    numberSet.has(nowChar) ||
+                    identifierCharSet.has(nowChar)
+                );
+                let part = srcCode.slice(nowTokenStart, nowIndex);
+
+                let token = new Token();
+                token.startIndex = nowTokenStart;
+                token.endIndex = nowIndex;
+                token.type = "number";
+                token.value = part;
+                token.orgValue = part;
+                ret.list.push(token);
+            }
+            else if (nowChar == " " || nowChar == "\t" || nowChar == "\n" || nowChar == "\r")
+            { // 空白分隔
+                do
+                {
+                    nowChar = srcCode[++nowIndex];
+                }
+                while (
+                    nowChar == " " ||
+                    nowChar == "\t" ||
+                    nowChar == "\n" ||
+                    nowChar == "\r"
+                );
+            }
+            else if (puncSet.has(nowChar))
+            { // 标点符号和括号符号
+                nowTokenStart = nowIndex;
+                nowIndex++;
+                let part = srcCode.slice(nowTokenStart, nowIndex);
+
+                let token = new Token();
+                token.startIndex = nowTokenStart;
+                token.endIndex = nowIndex;
+                token.type = "punc";
+                token.value = part;
+                token.orgValue = part;
+                ret.list.push(token);
+            }
+            else
+            { // 意外字符
+                throw CompilerError.create("An unexpected character has appeared", nowIndex);
+            }
         }
 
         return ret;

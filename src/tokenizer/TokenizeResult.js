@@ -6,6 +6,7 @@ import { Token } from "./Token.js";
 export class TokenizeResult
 {
     /**
+     * 分词列表
      * @type {Array<Token>}
      */
     list = [];

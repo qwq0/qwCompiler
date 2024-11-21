@@ -1,3 +1,4 @@
+import { Tokenizer } from "../tokenizer/Tokenizer.js";
 import { CompileResult } from "./CompileResult.js";
 
 /**
@@ -32,12 +33,14 @@ export class QWCompiler
 
     /**
      * 编译
-     * @param {string} modulePath
      * @param {string} srcString
      * @returns {Promise<CompileResult>}
      */
-    async compile(modulePath, srcString)
+    async compile(srcString)
     {
-        return;
+        let tokenizeResult = (new Tokenizer()).tokenize(srcString);
+        console.log(tokenizeResult);
+        let result = new CompileResult();
+        return result;
     }
 }
