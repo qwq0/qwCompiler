@@ -1,4 +1,5 @@
 import { Tokenizer } from "../tokenizer/Tokenizer.js";
+import { WasmBuilder } from "../wasmBuilder/WasmBuilder.js";
 import { CompileResult } from "./CompileResult.js";
 
 /**
@@ -41,6 +42,10 @@ export class QWCompiler
         let tokenizeResult = (new Tokenizer()).tokenize(srcString);
         console.log(tokenizeResult);
         let result = new CompileResult();
+
+        let wasmBuilder = new WasmBuilder();
+        result.bin = wasmBuilder.buildBin();
+
         return result;
     }
 }
