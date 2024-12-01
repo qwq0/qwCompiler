@@ -62,18 +62,28 @@ let puncSet = new Set([
     ";"
 ]);
 
+// 小写字母字符集合
 let lowercaseLetterSet = new Set(
     (new Array(26)).fill(0).map((_o, i) => String.fromCharCode("a".charCodeAt(0) + i))
 );
+// 大写字母字符集合
 let uppercaseLetterSet = new Set(
     (new Array(26)).fill(0).map((_o, i) => String.fromCharCode("A".charCodeAt(0) + i))
 );
+// 数字字符集合
 let numberSet = new Set(
     (new Array(10)).fill(0).map((_o, i) => String.fromCharCode("0".charCodeAt(0) + i))
 );
+// 标识符符号字符集合
 let identifierCharSet = new Set([
     "_",
     "$"
+]);
+// 引号字符列表
+let quotationSet = new Set([
+    "\"",
+    "\'",
+    "\`"
 ]);
 
 
@@ -167,6 +177,30 @@ export class Tokenizer
                 token.startIndex = nowTokenStart;
                 token.endIndex = nowIndex;
                 token.type = "punc";
+                token.value = part;
+                token.orgValue = part;
+                ret.list.push(token);
+            }
+            else if (quotationSet.has(nowChar))
+            { // 引号
+                let startQuotationChar = nowChar;
+                nowTokenStart = nowIndex;
+                do                
+                {
+                    nowChar = srcCode[++nowIndex];
+                    if (nowIndex >= srcCode.length)
+                        throw CompilerError.create("Quotation with no end", nowTokenStart);
+                }
+                while (
+                    nowChar != startQuotationChar
+                );
+                nowIndex++;
+                let part = srcCode.slice(nowTokenStart, nowIndex);
+
+                let token = new Token();
+                token.startIndex = nowTokenStart;
+                token.endIndex = nowIndex;
+                token.type = "literalString";
                 token.value = part;
                 token.orgValue = part;
                 ret.list.push(token);

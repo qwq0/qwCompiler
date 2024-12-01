@@ -1,3 +1,4 @@
+import { AstContext } from "../ast/AstContext.js";
 import { Tokenizer } from "../tokenizer/Tokenizer.js";
 import { WasmBuilder } from "../wasmBuilder/WasmBuilder.js";
 import { CompileResult } from "./CompileResult.js";
@@ -41,6 +42,9 @@ export class QWCompiler
     {
         let tokenizeResult = (new Tokenizer()).tokenize(srcString);
         console.log(tokenizeResult);
+
+        let astContext = new AstContext();
+
         let result = new CompileResult();
 
         let wasmBuilder = new WasmBuilder();
