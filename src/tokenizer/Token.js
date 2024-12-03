@@ -1,3 +1,5 @@
+import { KeywordInfo, keywordMap } from "../table/keyword";
+
 /**
  * 分出的词类
  */
@@ -5,9 +7,9 @@ export class Token
 {
     /**
      * 类别
-     * @type {"none" | "keyword" | "punc" | "identifier" | "number" | "literalString"}
+     * @type {"never" | "keyword" | "punc" | "identifier" | "number" | "literalString" | "annotation"}
      */
-    type = "none";
+    type = "never";
 
     /**
      * 值
@@ -33,4 +35,15 @@ export class Token
      * 不包括此索引
      */
     endIndex = 0;
+
+    /**
+     * @returns {KeywordInfo}
+     */
+    get keywordInfo()
+    {
+        if (this.type == "keyword")
+            return keywordMap.get(this.value);
+        else
+            return null;
+    }
 }

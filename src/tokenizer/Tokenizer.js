@@ -1,55 +1,9 @@
 import { CompilerError } from "../error/CompilerError.js";
+import { keywordMap } from "../table/keyword.js";
 import { Token } from "./Token.js";
 import { TokenizeResult } from "./TokenizeResult.js";
 
-/**
- * 关键字集合
- * @type {Set<string>}
- */
-let keywordsSet = new Set([
-    "const",
-    "void",
-    "int",
-    "uint",
-    "int8",
-    "int16",
-    "int32",
-    "int64",
-    "uint8",
-    "uint16",
-    "uint32",
-    "uint64",
-    "int128",
-    "float",
-    "float32",
-    "float64",
-    "string",
-    "bool",
-    "true",
-    "false",
-    "tuple",
-    "class",
-    "template",
-    "this",
-    "if",
-    "else",
-    "switch",
-    "case",
-    "while",
-    "do",
-    "for",
-    "continue",
-    "break",
-    "async",
-    "await",
-    "return",
-    "goto",
-    "try",
-    "catch",
-    "throw",
-    "import",
-    "export"
-]);
+
 
 let puncSet = new Set([
     "(",
@@ -108,10 +62,59 @@ export class Tokenizer
         while (nowIndex < srcCode.length)
         {
             let nowChar = srcCode[nowIndex];
-            if (lowercaseLetterSet.has(nowChar) || uppercaseLetterSet.has(nowChar))
+            if (
+                nowChar == "/" &&
+                (
+                    srcCode[nowIndex + 1] == "/" ||
+                    srcCode[nowIndex + 1] == "*"
+                )
+            )
+            { // 注释
+                nowTokenStart = nowIndex;
+                nowChar = srcCode[++nowIndex];
+                if (nowChar == "/")
+                { // 单行注释
+                    do
+                    {
+                        nowChar = srcCode[++nowIndex];
+                        if (nowIndex >= srcCode.length)
+                            break;
+                    }
+                    while (
+                        nowChar != "\n"
+                    );
+                }
+                else
+                { // 多行注释
+                    let lastChar = "";
+                    nowChar = srcCode[++nowIndex];
+                    do
+                    {
+                        lastChar = nowChar;
+                        nowChar = srcCode[++nowIndex];
+                        if (nowIndex >= srcCode.length)
+                            throw CompilerError.create("Annotation with no end", nowTokenStart);
+                    }
+                    while (
+                        nowChar != "/" ||
+                        lastChar != "*"
+                    );
+                    nowIndex++;
+                }
+                let part = srcCode.slice(nowTokenStart, nowIndex);
+
+                let token = new Token();
+                token.type = "annotation";
+                token.startIndex = nowTokenStart;
+                token.endIndex = nowIndex;
+                token.value = part;
+                token.orgValue = part;
+                ret.list.push(token);
+            }
+            else if (lowercaseLetterSet.has(nowChar) || uppercaseLetterSet.has(nowChar))
             { // 标识符和关键字
                 nowTokenStart = nowIndex;
-                do                
+                do
                 {
                     nowChar = srcCode[++nowIndex];
                 }
@@ -124,7 +127,7 @@ export class Tokenizer
                 let part = srcCode.slice(nowTokenStart, nowIndex);
 
                 let token = new Token();
-                token.type = (keywordsSet.has(part) ? "keyword" : "identifier");
+                token.type = (keywordMap.has(part) ? "keyword" : "identifier");
                 token.startIndex = nowTokenStart;
                 token.endIndex = nowIndex;
                 token.value = part;
@@ -185,9 +188,11 @@ export class Tokenizer
             { // 引号
                 let startQuotationChar = nowChar;
                 nowTokenStart = nowIndex;
-                do                
+                do
                 {
                     nowChar = srcCode[++nowIndex];
+                    if (nowChar == "\\")
+                        nowIndex++; // 跳过转义
                     if (nowIndex >= srcCode.length)
                         throw CompilerError.create("Quotation with no end", nowTokenStart);
                 }

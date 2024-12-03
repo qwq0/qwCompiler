@@ -5,16 +5,16 @@ import { CompileResult } from "./CompileResult.js";
 
 /**
  * 编译器上下文
+ * @typedef {{
+ *  path: string,
+ *  name?: string
+ * }} ModuleInfo
  */
 export class QWCompiler
 {
     /**
      * 获取引用模块时触发
-     * @type {(info: {
-     *  path: string,
-     *  currentPath: string,
-     *  name?: string
-     * }) => string | Promise<string>}
+     * @type {(info: ModuleInfo) => string | Promise<string>}
      */
     #onGetModule = (_info) =>
     {
@@ -36,14 +36,16 @@ export class QWCompiler
     /**
      * 编译
      * @param {string} srcString
+     * @param {ModuleInfo} [moduleInfo]
      * @returns {Promise<CompileResult>}
      */
-    async compile(srcString)
+    async compile(srcString, moduleInfo = { path: "" })
     {
         let tokenizeResult = (new Tokenizer()).tokenize(srcString);
         console.log(tokenizeResult);
 
         let astContext = new AstContext();
+        astContext.addModule(moduleInfo.path, tokenizeResult);
 
         let result = new CompileResult();
 

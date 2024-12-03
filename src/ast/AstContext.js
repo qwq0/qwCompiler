@@ -1,4 +1,6 @@
+import { Token } from "../tokenizer/Token.js";
 import { TokenizeResult } from "../tokenizer/TokenizeResult.js";
+import { AstBuilder } from "./AstBuilder.js";
 import { AstModule } from "./AstModule.js";
 
 /**
@@ -30,14 +32,10 @@ export class AstContext
     {
         let moduleContext = new AstModule();
 
-        let tokens = tokenResult.list;
-        let tokenIndex = 0;
+        let builder = new AstBuilder();
+        builder.setTokens(tokenResult);
+        builder.build();
 
-        while (true)
-        {
-            
-        }
-
-        this.moduleMap.set(moduleName, tokenResult);
+        this.moduleMap.set(moduleName, moduleContext);
     }
 }
