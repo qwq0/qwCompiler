@@ -1,4 +1,4 @@
-import { KeywordInfo, keywordMap } from "../table/keyword";
+import { KeywordInfo, keywordMap } from "../table/keyword.js";
 
 /**
  * 分出的词类
@@ -37,6 +37,7 @@ export class Token
     endIndex = 0;
 
     /**
+     * 获取关键词信息
      * @returns {KeywordInfo}
      */
     get keywordInfo()
@@ -45,5 +46,21 @@ export class Token
             return keywordMap.get(this.value);
         else
             return null;
+    }
+
+    /**
+     * 检测是否是指定token
+     * @param {{
+     *  [x in keyof Token]?: Token[x]
+     * }} obj 
+     */
+    is(obj)
+    {
+        for (let o of Object.entries(obj))
+        {
+            if (this[o[0]] != o[1])
+                return false;
+        }
+        return true;
     }
 }

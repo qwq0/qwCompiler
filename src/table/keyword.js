@@ -4,6 +4,11 @@
 export class KeywordInfo
 {
     /**
+     * 关键字名
+     */
+    name = "";
+
+    /**
      * 关键字表示一个基础类型
      */
     isValueType = false;
@@ -19,17 +24,24 @@ export class KeywordInfo
     isBoolConst = false;
 
     /**
+     * 关键字是控制语句关键字
+     */
+    isControl = false;
+
+    /**
      * 创建关键字信息
+     * @param {string} name
      * @param {{[x in keyof KeywordInfo]?: KeywordInfo[x]}} info 
      * @returns 
      */
-    static create(info)
+    static create(name, info)
     {
         let ret = new KeywordInfo();
         Object.entries(info).forEach(o =>
         {
             ret[o[0]] = o[1];
         });
+        ret.name = name;
         Object.freeze(ret);
         return ret;
     }
@@ -39,52 +51,57 @@ export class KeywordInfo
  * 关键字映射表
  * @type {Map<string, KeywordInfo>}
  */
-export let keywordMap = new Map([
-    ["const", KeywordInfo.create({ isVariability: true })],
+export let keywordMap = new Map();
 
-    ["void", KeywordInfo.create({ isValueType: true })],
-    ["int", KeywordInfo.create({ isValueType: true })],
-    ["uint", KeywordInfo.create({ isValueType: true })],
-    ["int8", KeywordInfo.create({ isValueType: true })],
-    ["int16", KeywordInfo.create({ isValueType: true })],
-    ["int32", KeywordInfo.create({ isValueType: true })],
-    ["int64", KeywordInfo.create({ isValueType: true })],
-    ["uint8", KeywordInfo.create({ isValueType: true })],
-    ["uint16", KeywordInfo.create({ isValueType: true })],
-    ["uint32", KeywordInfo.create({ isValueType: true })],
-    ["uint64", KeywordInfo.create({ isValueType: true })],
-    ["int128", KeywordInfo.create({ isValueType: true })],
-    ["float", KeywordInfo.create({ isValueType: true })],
-    ["float32", KeywordInfo.create({ isValueType: true })],
-    ["float64", KeywordInfo.create({ isValueType: true })],
-    ["string", KeywordInfo.create({ isValueType: true })],
-    ["bool", KeywordInfo.create({ isValueType: true })],
+([
+    KeywordInfo.create("const", { isVariability: true }),
 
-    ["true", KeywordInfo.create({ isBoolConst: true })],
-    ["false", KeywordInfo.create({ isBoolConst: true })],
+    KeywordInfo.create("void", { isValueType: true }),
+    KeywordInfo.create("int", { isValueType: true }),
+    KeywordInfo.create("uint", { isValueType: true }),
+    KeywordInfo.create("int8", { isValueType: true }),
+    KeywordInfo.create("int16", { isValueType: true }),
+    KeywordInfo.create("int32", { isValueType: true }),
+    KeywordInfo.create("int64", { isValueType: true }),
+    KeywordInfo.create("uint8", { isValueType: true }),
+    KeywordInfo.create("uint16", { isValueType: true }),
+    KeywordInfo.create("uint32", { isValueType: true }),
+    KeywordInfo.create("uint64", { isValueType: true }),
+    KeywordInfo.create("int128", { isValueType: true }),
+    KeywordInfo.create("float", { isValueType: true }),
+    KeywordInfo.create("float32", { isValueType: true }),
+    KeywordInfo.create("float64", { isValueType: true }),
+    KeywordInfo.create("string", { isValueType: true }),
+    KeywordInfo.create("bool", { isValueType: true }),
 
-    ["tuple", KeywordInfo.create({})],
-    ["class", KeywordInfo.create({})],
-    ["template", KeywordInfo.create({})],
-    ["this", KeywordInfo.create({})],
+    KeywordInfo.create("true", { isBoolConst: true }),
+    KeywordInfo.create("false", { isBoolConst: true }),
 
-    ["if", KeywordInfo.create({})],
-    ["else", KeywordInfo.create({})],
-    ["switch", KeywordInfo.create({})],
-    ["case", KeywordInfo.create({})],
-    ["while", KeywordInfo.create({})],
-    ["do", KeywordInfo.create({})],
-    ["for", KeywordInfo.create({})],
-    ["continue", KeywordInfo.create({})],
-    ["break", KeywordInfo.create({})],
+    KeywordInfo.create("tuple", {}),
+    KeywordInfo.create("class", {}),
+    KeywordInfo.create("template", {}),
+    KeywordInfo.create("this", {}),
 
-    ["async", KeywordInfo.create({})],
-    ["await", KeywordInfo.create({})],
-    ["return", KeywordInfo.create({})],
-    ["goto", KeywordInfo.create({})],
-    ["try", KeywordInfo.create({})],
-    ["catch", KeywordInfo.create({})],
-    ["throw", KeywordInfo.create({})],
-    ["import", KeywordInfo.create({})],
-    ["export", KeywordInfo.create({})]
-]);
+    KeywordInfo.create("if", { isControl: true }),
+    KeywordInfo.create("else", { isControl: true }),
+    KeywordInfo.create("switch", { isControl: true }),
+    KeywordInfo.create("case", { isControl: true }),
+    KeywordInfo.create("while", { isControl: true }),
+    KeywordInfo.create("do", { isControl: true }),
+    KeywordInfo.create("for", { isControl: true }),
+    KeywordInfo.create("continue", { isControl: true }),
+    KeywordInfo.create("break", { isControl: true }),
+
+    KeywordInfo.create("async", {}),
+    KeywordInfo.create("await", {}),
+    KeywordInfo.create("return", {}),
+    KeywordInfo.create("goto", {}),
+    KeywordInfo.create("try", {}),
+    KeywordInfo.create("catch", {}),
+    KeywordInfo.create("throw", {}),
+    KeywordInfo.create("import", {}),
+    KeywordInfo.create("export", {})
+]).forEach(o =>
+{
+    keywordMap.set(o.name, o);
+});
