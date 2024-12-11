@@ -1,8 +1,26 @@
+import { CompilerError } from "../error/CompilerError.js";
 import { Token } from "../tokenizer/Token.js";
 import { TokenizeResult } from "../tokenizer/TokenizeResult.js";
 import { AstBlockNode } from "./nodes/AstBlockNode.js";
 import { AstOperateNode } from "./nodes/AstOperateNode.js";
 import { AstRootNode } from "./nodes/AstRootNode.js";
+
+/**
+ * 语句类型enum
+ * @enum {number}
+ */
+let statementType = Object.freeze({
+    never: -1,
+    none: 0,
+    functionDefine: 1,
+    variableDefine: 2,
+    expression: 3,
+    ifStatement: 10,
+    switchStatement: 11,
+    forStatement: 12,
+    whileStatement: 13,
+    doWhileStatement: 14,
+});
 
 /**
  * ast构建器
@@ -110,14 +128,14 @@ export class AstBuilder
     { }
 
     /**
-     * 代码块循环
+     * 语句循环
      */
-    blockLoop()
+    statementLoop()
     {
-        let isFunctionDefine = false;
-        let isVariableDefine = false;
-        let isExpression = false;
-        let isControl = false;
+        /**
+         * @type {statementType}
+         */
+        let nowType = statementType.never;
         let defineType = "";
 
         if (this.nowToken?.type == "keyword")
@@ -127,40 +145,56 @@ export class AstBuilder
                 defineType = this.nowToken.value;
 
                 if (this.peekToken(2)?.is({ type: "punc", value: "(" }))
-                {
+                { // 定义函数
                     // 0   1 2 3 4
                     // int a ( ) { ... }
-                    isFunctionDefine = true;
+                    nowType = statementType.functionDefine;
                 }
                 else
-                {
+                { // 定义变量
                     // 0   1 2
                     // int a ;
-                    isVariableDefine = true;
+                    nowType = statementType.variableDefine;
                 }
             }
             else if (this.nowToken.keywordInfo.isControl)
             { // 控制语句
-                isControl = true;
+                switch (this.nowToken.keywordInfo.name)
+                {
+                    case "if":
+                        nowType = statementType.ifStatement;
+                        break;
+                    case "switch":
+                        nowType = statementType.switchStatement;
+                        break;
+                    case "for":
+                        nowType = statementType.forStatement;
+                        break;
+                    case "while":
+                        nowType = statementType.whileStatement;
+                        break;
+                    case "do":
+                        nowType = statementType.doWhileStatement;
+                        break;
+                }
             }
             else
             { // 表达式
-                isExpression = true;
+                nowType = statementType.expression;
             }
         }
         else
         { // 表达式
-            isExpression = true;
+            nowType = statementType.expression;
         }
 
-        if (isExpression)
+        switch (nowType)
         {
-            this.expressionLoop();
+            case statementType.never:
+                throw CompilerError.create("A unknown statement has appeared", this.nowToken?.startIndex);
+            default:
+                throw CompilerError.create("unprocessed statement type", this.nowToken?.startIndex);
         }
-        else if (isVariableDefine)
-        { }
-        else if (isFunctionDefine)
-        { }
     }
 
     /**
@@ -169,7 +203,7 @@ export class AstBuilder
     mainLoop()
     {
         if (this.nowInBlock)
-            this.blockLoop();
+            this.statementLoop();
         else
             this.expressionLoop();
     }
