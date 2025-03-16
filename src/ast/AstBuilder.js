@@ -146,7 +146,7 @@ export class AstBuilder
 
                 if (this.peekToken(2)?.is({ type: "punc", value: "(" }))
                 { // 定义函数
-                    // 0   1 2 3 4
+                    // 0   1 2
                     // int a ( ) { ... }
                     nowType = statementType.functionDefine;
                 }
